@@ -65,7 +65,7 @@ while True:
     ret, frame = vid.read()
     
     if ret:
-        detection_result, annotation = get_annotation_from(cv2.flip(frame, 0))
+        detection_result, annotation = get_annotation_from(cv2.flip(frame, 1))
         cv2.imshow('', annotation)  
     else:
         print("! No frame")
