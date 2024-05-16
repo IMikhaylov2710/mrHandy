@@ -6,11 +6,6 @@ Installation:
 2) cd into folder
 3) run pip install requirements.txt
 
-Optionally you can make a macOS application by:
-
-1) cd into folder and run python setup.py py2app, which would make a standalone app
-2) then go to dist and click into application, instruction is at [Official py2app documentations](https://py2app.readthedocs.io/en/latest/)
-
 Running script:
 
 1) run python face.py
@@ -19,4 +14,6 @@ Running script:
 By default this script recogizes two hands
 
 Whats new?
-Added py2app to requirements.txt, therefor no need for additional installations
+1) changed script to match OOP style
+2) updated gitignore to standard
+3) removed py2app
