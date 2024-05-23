@@ -2,7 +2,6 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import os
-import time
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe import solutions
