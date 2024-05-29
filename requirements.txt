@@ -1,5 +1,8 @@
+chime==0.7.0
+macmouse==0.7.4
 mediapipe==0.10.14
 numpy==1.24.3
 opencv_contrib_python==4.9.0.80
 opencv_python==4.9.0.80
 pandas==2.0.3
+screeninfo==0.8.1

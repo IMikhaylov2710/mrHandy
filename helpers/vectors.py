@@ -32,7 +32,3 @@ class Palm:
 def get_index_finger_coordinates(detection_result, gestureConditionMet):
     if gestureConditionMet:
         return print(detection_result.hand_landmarks[0])
-    
-#Emulate click
-
-#Get positions of 

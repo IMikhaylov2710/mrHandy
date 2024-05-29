@@ -1,6 +1,6 @@
 build
 unit.py
-config.py
+_playground.py
 dist# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

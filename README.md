@@ -8,17 +8,25 @@ Installation:
 
 Running script:
 
+0) this script will ask for access to monitor, mouse control and camera, feel free to give it, it is absolutely safe
 1) run python face.py
 2) you could run face.py --help if you want to use arguments
-3) to exit cam press "q"
+3) to exit cam press "q" (make sure you use english keyboard)
 
 How to use?
-By default this script has two modes: recognition and master mode. To switch between mods you should show open palm to the camera for 20 frames (by default). After switching mode the script will notify you. After you enter master mode the programm will automatically monitor the following parts of the palm: tip of each finger and coordinate for every knuckle.
+By default this script has two modes: recognition and master mode. In recognition mode the programm will wait until it sees a gesture to switch to master mode (by default it is open palm) for 20 frames. To switch back to recognition mode you should point your index finger up for 20 frames.
 
-By default this script recogizes two hands
+By default switching between modes has a sound notification (could be turned off using --muffle flag)
+
+After you enter master mode the programm will automatically monitor the following parts of the palm:
+1) tip of each finger
+2) coordinate for every knuckle
+3) centroid of your knuckles
+
+In master mode your mouse cursor follows the centroid of your knuckles in absolute coordinates (beta). Currently this program only supports one monitor (two monitors support will be added later).
 
 Whats new?
-1) added gesture recognition
-2) added lagging (several frames with no gesture recognized will be omitted for better recognition performance, number of frames could be changed with arguments, see --help for convenience)
-2) started beta of gesture logic 
-3) added argparse for better interaction with the script
+1) Added mouse control for macOS
+2) Added the emulation for mouse left click and mouse release
+
+For compliance or collaboration feel free to contact me at i.mikhailov@omnigene.tech
