@@ -14,6 +14,7 @@ This is a script for hand recognition using webcam
 3) to exit cam press "q" (make sure you use english keyboard)
 
 **How to use?**
+
 By default this script has two modes: recognition and master mode. In recognition mode the programm will wait until it sees a gesture to switch to master mode (by default it is open palm) for 20 frames. To switch back to recognition mode you should point your index finger up for 20 frames.
 
 By default switching between modes has a sound notification (could be turned off using --muffle flag)

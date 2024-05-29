@@ -77,20 +77,20 @@ def enterMasterMode(caughtGesture, masterFrames):
         print(f'hold your hand, {config.masterCommandCounter}/{masterFrames}')
 
 #Looking for a click
-def catchClick(gesture, open, mouse, frames):
+def catchClick(gesture, mouse, frames):
     print(config.forClick)
-    if open and gesture == 'Closed_Fist':
+    if config.open and gesture == 'Closed_Fist':
         config.forClick += 1
         if config.forClick >= frames:
             clickMouse(mouse)
-            open = False
+            config.open = False
             config.forClick = 0 
             print('==========CLICKED MF!!!!============')
     elif gesture == 'Open_Palm':
         config.forClic += 1
         if config.forClick >= frames:
             releaseMouse(mouse)
-            open = True
+            config.open = True
             config.forClick = 0
             print('==========RELEASED MF!!!!===========')
     else:
@@ -114,7 +114,7 @@ while True:
                 X_abs = width * X_centroid
                 Y_abs = height * Y_centroid
                 moveMouse(X_abs, Y_abs, newMouse)
-                catchClick(config.caughtGesture, True, newMouse, args.clickFrames)
+                catchClick(config.caughtGesture, newMouse, args.clickFrames)
         if config.caughtGesture:
             enterMasterMode(config.caughtGesture, args.MasterModeFrames)
         cv2.imshow('', annotation)  
