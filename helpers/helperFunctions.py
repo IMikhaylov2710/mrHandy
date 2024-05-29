@@ -17,31 +17,31 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 model_path = os.path.join(dir_path, 'recognizers/hand_landmarker.task')
 gesture_model_path = os.path.join(dir_path, 'recognizers/gesture_recognizer.task')
 
-#Basic hand recognition
+#basic hand recognition
 base_options = python.BaseOptions(model_asset_path=model_path)
-options = vision.HandLandmarkerOptions(base_options=base_options, num_hands=2, min_hand_detection_confidence=0.5, min_hand_presence_confidence = 0.5, min_tracking_confidence=0.5)
+options = vision.HandLandmarkerOptions(base_options=base_options, num_hands=1, min_hand_detection_confidence=0.5, min_hand_presence_confidence = 0.5, min_tracking_confidence=0.4)
 detector = vision.HandLandmarker.create_from_options(options)
 
-#Gesture recognition
+#gesture recognition
 gesture_base_options = mp.tasks.BaseOptions
 GestureRecognizer = mp.tasks.vision.GestureRecognizer
 GestureRecognizerOptions = mp.tasks.vision.GestureRecognizerOptions
 GestureRecognizerResult = mp.tasks.vision.GestureRecognizerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
-#Printing gesture recognizer callback
+#printing gesture recognizer callback
 def print_result(result: GestureRecognizerResult, output_image: mp.Image, timestamp_ms: int):
     print('gesture recognition result: {}'.format(result))
 
-#Gesture recognition parameters
+#gesture recognition parameters
 gestureOptions = GestureRecognizerOptions(
     base_options=python.BaseOptions(model_asset_path=gesture_model_path),
     running_mode=VisionRunningMode.IMAGE)
 
-#Initializing gestire recognizer
+#initializing gesture recognizer
 gestureDetector = GestureRecognizer.create_from_options(gestureOptions)
 
-#Drawing hand landmarks on the image
+#drawing hand landmarks on the image
 def draw_landmarks_on_image(rgb_image, detection_result, mode):
     if mode == 'mm':
         HANDEDNESS_TEXT_COLOR = (255, 45, 0)
@@ -87,9 +87,8 @@ def draw_landmarks_on_image(rgb_image, detection_result, mode):
                          FONT_THICKNESS, 
                          cv2.LINE_AA)
     return annotated_image
-    return annotated_image
 
-#Main function
+#main function for recognition to tensor
 def get_annotation_from(frame, mode):
     image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
     detection_result = detector.detect(image)

@@ -25,7 +25,6 @@ class Palm:
         x = [knuckle.x for knuckle in self.knuckles]
         y = [knuckle.y for knuckle in self.knuckles]
         centroid = (sum(x) / 4, sum(y) / 4)
-        print(centroid)
         return centroid
 
 #Future steps for apple vision employment
