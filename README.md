@@ -1,19 +1,19 @@
 This is a script for hand recognition using webcam
 
-Installation:
+**Installation:**
 
 1) git clone
 2) cd into folder
 3) run pip install requirements.txt
 
-Running script:
+**Running script:**
 
 0) this script will ask for access to monitor, mouse control and camera, feel free to give it, it is absolutely safe
 1) run python face.py
 2) you could run face.py --help if you want to use arguments
 3) to exit cam press "q" (make sure you use english keyboard)
 
-How to use?
+**How to use?**
 By default this script has two modes: recognition and master mode. In recognition mode the programm will wait until it sees a gesture to switch to master mode (by default it is open palm) for 20 frames. To switch back to recognition mode you should point your index finger up for 20 frames.
 
 By default switching between modes has a sound notification (could be turned off using --muffle flag)
