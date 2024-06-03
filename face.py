@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Script for hand/gesture detection 
 parser.add_argument("-f", "--FrameRate", help = "milliseconds for script to wait between analysis",
                    nargs = '?',
                    type = float, 
-                   default = "0.01")
+                   default = "0.05")
 parser.add_argument("-l", "--FrameLag", help = "frames without gesture to store last gesture in memory, default = 5",
                    nargs = '?',
                    type = float, 
@@ -26,7 +26,7 @@ parser.add_argument("-mFrames", "--MasterModeFrames", help = "number of frames t
 parser.add_argument("-cFrames", "--clickFrames", help = "number of frames for detection during mouse click and mouse release events, default to 3",
                     nargs = '?', 
                     type = float, 
-                    default = 3.0)
+                    default = 2.0)
 parser.add_argument("--muffle", action="store_true", help = "use this flag to turn sound notification off")
 parser.add_argument("--log", action="store_true", help = "use this flag to log all actions")
 args = parser.parse_args()
@@ -87,7 +87,7 @@ def catchClick(gesture, mouse, frames):
             config.forClick = 0 
             print('==========CLICKED MF!!!!============')
     elif gesture == 'Open_Palm':
-        config.forClic += 1
+        config.forClick += 1
         if config.forClick >= frames:
             releaseMouse(mouse)
             config.open = True
