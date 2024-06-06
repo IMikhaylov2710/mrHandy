@@ -6,3 +6,6 @@ def clickMouse(mouse):
 
 def releaseMouse(mouse):
     return mouse.release(button='left')
+
+def pressMouse(mouse):
+    return mouse.press(button='left')

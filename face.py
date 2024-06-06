@@ -4,11 +4,13 @@ import chime
 import macmouse
 import argparse
 from helpers.helperFunctions import get_annotation_from
-from helpers.control import moveMouse, clickMouse, releaseMouse
+from helpers.control import moveMouse, clickMouse, releaseMouse, pressMouse
 from helpers.vectors import Palm
 from screeninfo import get_monitors
 from datetime import datetime
 import config
+from PIL import Image, ImageEnhance
+import numpy as np
 
 parser = argparse.ArgumentParser(description='Script for hand/gesture detection and PC interaction')
 parser.add_argument("-f", "--FrameRate", help = "milliseconds for script to wait between analysis",
@@ -19,15 +21,18 @@ parser.add_argument("-l", "--FrameLag", help = "frames without gesture to store 
                    nargs = '?',
                    type = float, 
                    default = "5")
-parser.add_argument("-mFrames", "--MasterModeFrames", help = "number of frames to keep stored gesture to enter master mode, default = 20, lagging included",
+parser.add_argument("-mf", "--MasterModeFrames", help = "number of frames to keep stored gesture to enter master mode, default = 20, lagging included",
                    nargs = '?',
                    type = float, 
                    default = "20")
-parser.add_argument("-cFrames", "--clickFrames", help = "number of frames for detection during mouse click and mouse release events, default to 3",
+parser.add_argument("-cf", "--clickFrames", help = "number of frames for detection during mouse click and mouse release events, default to 3",
                     nargs = '?', 
                     type = float, 
                     default = 2.0)
 parser.add_argument("--muffle", action="store_true", help = "use this flag to turn sound notification off")
+parser.add_argument("--centroid", action="store_true", help = "use this flag for mouse to follow center of your knuckles")
+parser.add_argument("--contrast", action="store_true", help = "use this flag enhance contrast of image. WARNING! Still in beta")
+parser.add_argument("--brightness", action="store_true", help = "use this flag to reduce brightness of image")
 parser.add_argument("--log", action="store_true", help = "use this flag to log all actions")
 args = parser.parse_args()
 
@@ -38,7 +43,6 @@ if __name__ == "__main__":
 
 #Basic lagging logic, to store gestures for N frames
 def storeLagging(currentGesture, lag, log):
-    config.recognitionCounter
     if config.caughtGesture == None:
         if currentGesture:
             if log:
@@ -74,50 +78,81 @@ def enterMasterMode(caughtGesture, masterFrames):
             config.mode = 'r'
     elif caughtGesture == config.commandGestures[config.mode]:
         config.masterCommandCounter += 1
-        print(f'hold your hand, {config.masterCommandCounter}/{masterFrames}')
+        if args.log:
+            print(f'hold your hand, {config.masterCommandCounter}/{masterFrames}')
 
 #Looking for a click
 def catchClick(gesture, mouse, frames):
-    print(config.forClick)
     if config.open and gesture == 'Closed_Fist':
         config.forClick += 1
         if config.forClick >= frames:
             clickMouse(mouse)
             config.open = False
             config.forClick = 0 
-            print('==========CLICKED MF!!!!============')
     elif gesture == 'Open_Palm':
         config.forClick += 1
         if config.forClick >= frames:
             releaseMouse(mouse)
             config.open = True
             config.forClick = 0
-            print('==========RELEASED MF!!!!===========')
     else:
         config.forClick = 0
+
+def lagPressStatus(mouse, mouseCallback):
+    print(config.pressCounter)
+    if config.pressCounter >= 3:
+        mouseCallback(mouse)
+        config.pressCounter = 0
+    else:
+        config.pressCounter += 1
 
 monitors = get_monitors()
 width = monitors[0].width
 height = monitors[0].height
+factor = 0.5
 
 while True:
 
     ret, frame = vid.read()
     
     if ret:
-        detection_result, annotation, currentGesture = get_annotation_from(cv2.flip(frame, 1), config.mode)
-        storeLagging(currentGesture, args.FrameLag, args.log)
-        if detection_result.handedness:
-            if config.mode == 'mm':
-                hand = Palm(detection_result.hand_landmarks[0])
-                X_centroid, Y_centroid = hand.findCenter()
-                X_abs = width * X_centroid
-                Y_abs = height * Y_centroid
-                moveMouse(X_abs, Y_abs, newMouse)
-                catchClick(config.caughtGesture, newMouse, args.clickFrames)
-        if config.caughtGesture:
-            enterMasterMode(config.caughtGesture, args.MasterModeFrames)
-        cv2.imshow('', annotation)  
+        if args.contrast:
+            lab= cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            l_channel, a, b = cv2.split(lab)
+            clahe = cv2.createCLAHE(clipLimit = 4.0, tileGridSize = (4,4))
+            cl = clahe.apply(l_channel)
+            limg = cv2.merge((cl,a,b))
+            enhanced_img = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+            detection_result, annotation, currentGesture = get_annotation_from(cv2.flip(enhanced_img, 1), config.mode)
+            cv2.imshow('', annotation)
+        elif args.brightness:
+            img_enhancer = ImageEnhance.Brightness(frame)
+            enhanced_output = img_enhancer.enhance(factor) 
+            detection_result, annotation, currentGesture = get_annotation_from(cv2.flip(enhanced_output, 1), config.mode)
+        else:
+            detection_result, annotation, currentGesture = get_annotation_from(cv2.flip(frame, 1), config.mode)
+            storeLagging(currentGesture, args.FrameLag, args.log)
+            if detection_result.handedness:
+                if config.mode == 'mm':
+                    hand = Palm(detection_result.hand_landmarks[0])
+                    if args.centroid:
+                        X_centroid, Y_centroid = hand.findCenter()
+                        X_abs = width * X_centroid
+                        Y_abs = height * Y_centroid
+                    else:
+                        X_abs = width*hand.bottom.x
+                        Y_abs = height*hand.bottom.y
+                    moveMouse(X_abs, Y_abs, newMouse)
+                    distance = hand.getIndexBigDistance()
+                    if distance < 0.1:
+                        pressMouse(newMouse)
+                        config.mousePressed = True
+                    elif config.mousePressed:
+                        lagPressStatus(newMouse, releaseMouse)
+                    catchClick(config.caughtGesture, newMouse, args.clickFrames)
+            if config.caughtGesture:
+                enterMasterMode(config.caughtGesture, args.MasterModeFrames)
+            cv2.imshow('', annotation)  
     else:
         print("! No frame")
         break
@@ -125,6 +160,7 @@ while True:
     time.sleep(float(args.FrameRate))
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
+        releaseMouse(newMouse)
         break
 
 vid.release() 
