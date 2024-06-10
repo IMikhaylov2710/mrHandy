@@ -24,10 +24,13 @@ After you enter master mode the programm will automatically monitor the followin
 2) coordinate for every knuckle
 3) centroid of your knuckles
 
-In master mode your mouse cursor follows the centroid of your knuckles in absolute coordinates (beta). Currently this program only supports one monitor (two monitors support will be added later).
+In master mode your mouse cursor follows the basis of your palm in absolute coordinates (beta). Currently this program only supports one monitor (two monitors support will be added later).
 
-Whats new?
-1) Added mouse control for macOS
-2) Added the emulation for mouse left click and mouse release
+To click with mouse close index and big finger.
+
+**Whats new?**
+
+1) Added push/release control of mouse
+2) Reworked click from open palm -> fist to closing index and big finger
 
 For compliance or collaboration feel free to contact me at i.mikhailov@omnigene.tech

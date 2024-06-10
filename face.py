@@ -4,13 +4,13 @@ import chime
 import macmouse
 import argparse
 from helpers.helperFunctions import get_annotation_from
-from helpers.control import moveMouse, clickMouse, releaseMouse, pressMouse
+from helpers.control import moveMouse, releaseMouse, pressMouse
 from helpers.vectors import Palm
+from helpers.logic import lagPressStatus
 from screeninfo import get_monitors
 from datetime import datetime
 import config
-from PIL import Image, ImageEnhance
-import numpy as np
+from PIL import ImageEnhance
 
 parser = argparse.ArgumentParser(description='Script for hand/gesture detection and PC interaction')
 parser.add_argument("-f", "--FrameRate", help = "milliseconds for script to wait between analysis",
@@ -74,37 +74,22 @@ def enterMasterMode(caughtGesture, masterFrames):
             config.mode = 'mm'
         else:
             if not args.muffle:
-                chime.info()
+                chime.success()
             config.mode = 'r'
     elif caughtGesture == config.commandGestures[config.mode]:
         config.masterCommandCounter += 1
         if args.log:
             print(f'hold your hand, {config.masterCommandCounter}/{masterFrames}')
 
-#Looking for a click
-def catchClick(gesture, mouse, frames):
-    if config.open and gesture == 'Closed_Fist':
-        config.forClick += 1
-        if config.forClick >= frames:
-            clickMouse(mouse)
-            config.open = False
-            config.forClick = 0 
-    elif gesture == 'Open_Palm':
-        config.forClick += 1
-        if config.forClick >= frames:
-            releaseMouse(mouse)
-            config.open = True
-            config.forClick = 0
-    else:
-        config.forClick = 0
-
-def lagPressStatus(mouse, mouseCallback):
-    print(config.pressCounter)
-    if config.pressCounter >= 3:
+#Lag mouse press/release
+def lagPressStatus(mouse, mouseCallback, counter):
+    if counter >= 3:
         mouseCallback(mouse)
-        config.pressCounter = 0
+        if not args.muffle:
+            chime.info()
+        counter = 0
     else:
-        config.pressCounter += 1
+        counter += 1
 
 monitors = get_monitors()
 width = monitors[0].width
@@ -145,11 +130,16 @@ while True:
                     moveMouse(X_abs, Y_abs, newMouse)
                     distance = hand.getIndexBigDistance()
                     if distance < 0.1:
-                        pressMouse(newMouse)
-                        config.mousePressed = True
+                        if config.mousePressed:
+                            config.pressCounter = 0
+                        else:
+                            pressMouse(newMouse)
+                            config.mousePressed = True
+                            if not args.muffle:
+                                chime.info()
                     elif config.mousePressed:
-                        lagPressStatus(newMouse, releaseMouse)
-                    catchClick(config.caughtGesture, newMouse, args.clickFrames)
+                            lagPressStatus(newMouse, releaseMouse, config.pressCounter)
+                            print(config.pressCounter)
             if config.caughtGesture:
                 enterMasterMode(config.caughtGesture, args.MasterModeFrames)
             cv2.imshow('', annotation)  
