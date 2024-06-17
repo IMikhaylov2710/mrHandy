@@ -6,7 +6,6 @@ import argparse
 from helpers.helperFunctions import get_annotation_from
 from helpers.control import moveMouse, releaseMouse, pressMouse
 from helpers.vectors import Palm
-from helpers.logic import lagPressStatus
 from screeninfo import get_monitors
 from datetime import datetime
 import config
@@ -82,9 +81,10 @@ def enterMasterMode(caughtGesture, masterFrames):
             print(f'hold your hand, {config.masterCommandCounter}/{masterFrames}')
 
 #Lag mouse press/release
-def lagPressStatus(mouse, mouseCallback, counter):
+def lagPressStatus(mouse, counter):
     if counter >= 3:
-        mouseCallback(mouse)
+        print('\t mouse released from callback')
+        releaseMouse(mouse)
         if not args.muffle:
             chime.info()
         counter = 0
@@ -131,15 +131,18 @@ while True:
                     distance = hand.getIndexBigDistance()
                     if distance < 0.1:
                         if config.mousePressed:
+                            print('hand still closed, holding')
                             config.pressCounter = 0
                         else:
                             pressMouse(newMouse)
+                            print('mouse pressed')
                             config.mousePressed = True
                             if not args.muffle:
                                 chime.info()
                     elif config.mousePressed:
-                            lagPressStatus(newMouse, releaseMouse, config.pressCounter)
-                            print(config.pressCounter)
+                        print('lagging release')
+                        lagPressStatus(newMouse, config.pressCounter)
+                        print(config.pressCounter)
             if config.caughtGesture:
                 enterMasterMode(config.caughtGesture, args.MasterModeFrames)
             cv2.imshow('', annotation)  
