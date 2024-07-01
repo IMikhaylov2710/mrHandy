@@ -24,13 +24,15 @@ After you enter master mode the programm will automatically monitor the followin
 2) coordinate for every knuckle
 3) centroid of your knuckles
 
-In master mode your mouse cursor follows the basis of your palm in absolute coordinates (beta). Currently this program only supports one monitor (two monitors support will be added later).
+In master mode your mouse cursor follows the basis of your palm in relative coordinates (beta). Currently this program only supports one monitor (two monitors support will be added later).
 
-To click with mouse close index and big finger.
+To click with mouse close index finger and thumb. To release simply get those fingers apart. By doing so you can drag and drop applications or select text or do various stuff.
+To double click close middle finger and thumb.
 
 **Whats new?**
 
-1) Added push/release control of mouse
-2) Reworked click from open palm -> fist to closing index and big finger
+1) Added double click option
+2) Added various image enhancement parameters
+3) Added linear coordinates correction
 
 For compliance or collaboration feel free to contact me at i.mikhailov@omnigene.tech
