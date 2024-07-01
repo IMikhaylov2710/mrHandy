@@ -129,12 +129,8 @@ while True:
                         if 0.2 < hand.bottom.x < 0.8 and 0.2 < hand.bottom.y < 0.8:
                             X_abs = hand.bottom.x - 0.2
                             Y_abs = hand.bottom.y - 0.2
-                            print([X_abs * (width / width * 0.6), Y_abs * (height / height * 0.6), 
-                                   hand.bottom.x, hand.bottom.y])
-                            X_corrected = X_abs * (width / width * 0.6)
-                            Y_corrected = Y_abs * (height / height * 0.6)
-                        else:
-                            print('\t', hand.bottom.x, hand.bottom.y)
+                            X_corrected = X_abs * (float(width)**2 / (float(width) * 0.6))
+                            Y_corrected = Y_abs * (float(height)**2 / (float(height) * 0.6))
                     moveMouse(X_corrected, Y_corrected, newMouse)
                     distance = hand.getIndexBigDistance()
                     if distance < 0.1:
