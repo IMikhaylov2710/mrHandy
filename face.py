@@ -32,6 +32,7 @@ parser.add_argument("--muffle", action="store_true", help = "use this flag to tu
 parser.add_argument("--centroid", action="store_true", help = "use this flag for mouse to follow center of your knuckles")
 parser.add_argument("--contrast", action="store_true", help = "use this flag enhance contrast of image. WARNING! Still in beta")
 parser.add_argument("--brightness", action="store_true", help = "use this flag to reduce brightness of image")
+parser.add_argument("--noCorr", action="store_true", help = "use this flag to not perform correction of coordinates")
 parser.add_argument("--log", action="store_true", help = "use this flag to log all actions")
 args = parser.parse_args()
 
@@ -82,9 +83,9 @@ def enterMasterMode(caughtGesture, masterFrames):
 
 #Lag mouse press/release
 def lagPressStatus(mouse):
-    if config.pressCounter >= 3:
-        print('\t mouse released from callback')
+    if config.pressCounter >= 1:
         releaseMouse(mouse)
+        config.mousePressed = False
         if not args.muffle:
             chime.info()
         config.pressCounter = 0
@@ -102,7 +103,7 @@ while True:
     
     if ret:
         if args.contrast:
-            lab= cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+            lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
             l_channel, a, b = cv2.split(lab)
             clahe = cv2.createCLAHE(clipLimit = 4.0, tileGridSize = (4,4))
             cl = clahe.apply(l_channel)
@@ -125,24 +126,27 @@ while True:
                         X_abs = width * X_centroid
                         Y_abs = height * Y_centroid
                     else:
-                        X_abs = width*hand.bottom.x
-                        Y_abs = height*hand.bottom.y
-                    moveMouse(X_abs, Y_abs, newMouse)
+                        if 0.2 < hand.bottom.x < 0.8 and 0.2 < hand.bottom.y < 0.8:
+                            X_abs = width * hand.bottom.x
+                            Y_abs = height * hand.bottom.y
+                            print([hand.bottom.x * (width / width * 0.6), hand.bottom.y * (height / height * 0.6), 
+                                   hand.bottom.x, hand.bottom.y])
+                            X_corrected = (hand.bottom.x - 0.2) * (width / width * 0.6)
+                            Y_corrected = (hand.bottom.y - 0.2) * (height / height * 0.6)
+                        else:
+                            print('\t', hand.bottom.x, hand.bottom.y)
+                    moveMouse(X_corrected, Y_corrected, newMouse)
                     distance = hand.getIndexBigDistance()
                     if distance < 0.1:
                         if config.mousePressed:
-                            print('hand still closed, holding')
                             config.pressCounter = 0
                         else:
                             pressMouse(newMouse)
-                            print('mouse pressed')
                             config.mousePressed = True
                             if not args.muffle:
                                 chime.info()
                     elif config.mousePressed:
-                        print('lagging release')
                         lagPressStatus(newMouse)
-                        print(config.pressCounter)
             if config.caughtGesture:
                 enterMasterMode(config.caughtGesture, args.MasterModeFrames)
             cv2.imshow('', annotation)  
