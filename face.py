@@ -81,15 +81,15 @@ def enterMasterMode(caughtGesture, masterFrames):
             print(f'hold your hand, {config.masterCommandCounter}/{masterFrames}')
 
 #Lag mouse press/release
-def lagPressStatus(mouse, counter):
-    if counter >= 3:
+def lagPressStatus(mouse):
+    if config.pressCounter >= 3:
         print('\t mouse released from callback')
         releaseMouse(mouse)
         if not args.muffle:
             chime.info()
-        counter = 0
+        config.pressCounter = 0
     else:
-        counter += 1
+        config.pressCounter += 1
 
 monitors = get_monitors()
 width = monitors[0].width
@@ -141,7 +141,7 @@ while True:
                                 chime.info()
                     elif config.mousePressed:
                         print('lagging release')
-                        lagPressStatus(newMouse, config.pressCounter)
+                        lagPressStatus(newMouse)
                         print(config.pressCounter)
             if config.caughtGesture:
                 enterMasterMode(config.caughtGesture, args.MasterModeFrames)
