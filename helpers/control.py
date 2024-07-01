@@ -4,6 +4,13 @@ def moveMouse(x, y, mouse):
 def clickMouse(mouse):
     return mouse.click(button='left')
 
+def doubleClickMouse(mouse):
+    mouse.click(button='left')
+    mouse.release(button='left')
+    mouse.click(button='left')
+    mouse.release(button='left')
+    return True
+
 def releaseMouse(mouse):
     return mouse.release(button='left')
 

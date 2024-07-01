@@ -4,7 +4,7 @@ import chime
 import macmouse
 import argparse
 from helpers.helperFunctions import get_annotation_from
-from helpers.control import moveMouse, releaseMouse, pressMouse
+from helpers.control import moveMouse, releaseMouse, pressMouse, doubleClickMouse
 from helpers.vectors import Palm
 from screeninfo import get_monitors
 from datetime import datetime
@@ -132,8 +132,9 @@ while True:
                             X_corrected = X_abs * (float(width)**2 / (float(width) * 0.6))
                             Y_corrected = Y_abs * (float(height)**2 / (float(height) * 0.6))
                     moveMouse(X_corrected, Y_corrected, newMouse)
-                    distance = hand.getIndexBigDistance()
-                    if distance < 0.1:
+                    leftDistance = hand.getIndexBigDistance()
+                    doubleDistance = hand.getMiddleBigDistance()
+                    if leftDistance < 0.1:
                         if config.mousePressed:
                             config.pressCounter = 0
                         else:
@@ -143,6 +144,8 @@ while True:
                                 chime.info()
                     elif config.mousePressed:
                         lagPressStatus(newMouse)
+                    if doubleDistance < 0.1:
+                        doubleClickMouse(newMouse)
             if config.caughtGesture:
                 enterMasterMode(config.caughtGesture, args.MasterModeFrames)
             cv2.imshow('', annotation)  

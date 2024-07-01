@@ -35,7 +35,16 @@ class Palm:
         p1 = np.array([self.big.x, self.big.y, self.big.z])
         p2 = np.array([self.index.x, self.index.y, self.index.z])
         squared_dist = np.sum((p1-p2)**2, axis=0)
-        distance= np.sqrt(squared_dist)
+        distance = np.sqrt(squared_dist)
+        
+        return distance
+    
+    def getMiddleBigDistance(self):
+
+        p1 = np.array([self.big.x, self.big.y, self.big.z])
+        p2 = np.array([self.middle.x, self.middle.y, self.middle.z])
+        squared_dist = np.sum((p1-p2)**2, axis=0)
+        distance = np.sqrt(squared_dist)
         
         return distance
 
