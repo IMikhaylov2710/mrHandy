@@ -127,12 +127,12 @@ while True:
                         Y_abs = height * Y_centroid
                     else:
                         if 0.2 < hand.bottom.x < 0.8 and 0.2 < hand.bottom.y < 0.8:
-                            X_abs = width * hand.bottom.x
-                            Y_abs = height * hand.bottom.y
-                            print([hand.bottom.x * (width / width * 0.6), hand.bottom.y * (height / height * 0.6), 
+                            X_abs = hand.bottom.x - 0.2
+                            Y_abs = hand.bottom.y - 0.2
+                            print([X_abs * (width / width * 0.6), Y_abs * (height / height * 0.6), 
                                    hand.bottom.x, hand.bottom.y])
-                            X_corrected = (hand.bottom.x - 0.2) * (width / width * 0.6)
-                            Y_corrected = (hand.bottom.y - 0.2) * (height / height * 0.6)
+                            X_corrected = X_abs * (width / width * 0.6)
+                            Y_corrected = Y_abs * (height / height * 0.6)
                         else:
                             print('\t', hand.bottom.x, hand.bottom.y)
                     moveMouse(X_corrected, Y_corrected, newMouse)
