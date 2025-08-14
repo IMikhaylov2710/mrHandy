@@ -19,7 +19,14 @@ gesture_model_path = os.path.join(dir_path, 'recognizers/gesture_recognizer.task
 
 #basic hand recognition
 base_options = python.BaseOptions(model_asset_path=model_path)
-options = vision.HandLandmarkerOptions(base_options=base_options, num_hands=1, min_hand_detection_confidence=0.5, min_hand_presence_confidence = 0.5, min_tracking_confidence=0.5)
+options = vision.HandLandmarkerOptions(
+    base_options=base_options,
+    num_hands=1,
+    min_hand_detection_confidence=0.5,
+    min_hand_presence_confidence=0.5,
+    min_tracking_confidence=0.5,
+    running_mode=mp.tasks.vision.RunningMode.VIDEO,
+)
 detector = vision.HandLandmarker.create_from_options(options)
 
 #gesture recognition
@@ -36,7 +43,7 @@ def print_result(result: GestureRecognizerResult, output_image: mp.Image, timest
 #gesture recognition parameters
 gestureOptions = GestureRecognizerOptions(
     base_options=python.BaseOptions(model_asset_path=gesture_model_path),
-    running_mode=VisionRunningMode.IMAGE)
+    running_mode=VisionRunningMode.VIDEO)
 
 #initializing gesture recognizer
 gestureDetector = GestureRecognizer.create_from_options(gestureOptions)
@@ -88,15 +95,57 @@ def draw_landmarks_on_image(rgb_image, detection_result, mode):
                          cv2.LINE_AA)
     return annotated_image
 
+# Heuristic gesture inference (optional)
+# Returns 'Open_Palm', 'Pointing_Up', or None
+
+def infer_gesture_from_landmarks(detection_result):
+    try:
+        if detection_result is None or not detection_result.hand_landmarks:
+            return None
+        lm = detection_result.hand_landmarks[0]
+        # Landmark indices per MediaPipe Hands
+        # Thumb: 4 (tip), 3 (ip)
+        # Index: 8 (tip), 6 (pip)
+        # Middle: 12, 10
+        # Ring: 16, 14
+        # Little: 20, 18
+        def is_extended(tip_idx, pip_idx):
+            tip = lm[tip_idx]
+            pip = lm[pip_idx]
+            return tip.y < pip.y - 0.02  # y up means smaller; small margin
+        index_ext = is_extended(8, 6)
+        middle_ext = is_extended(12, 10)
+        ring_ext = is_extended(16, 14)
+        little_ext = is_extended(20, 18)
+        extended_count = sum([index_ext, middle_ext, ring_ext, little_ext])
+        # Open palm: at least 3 fingers extended
+        if extended_count >= 3:
+            return 'Open_Palm'
+        # Pointing up: only index extended
+        if index_ext and not middle_ext and not ring_ext and not little_ext:
+            return 'Pointing_Up'
+        return None
+    except Exception:
+        return None
+
 #main function for recognition to tensor
-def get_annotation_from(frame, mode):
-    image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
-    detection_result = detector.detect(image)
-    gestureResults = gestureDetector.recognize(image)
-    annotated_image = draw_landmarks_on_image(image.numpy_view(), detection_result, mode)
-    if gestureResults.gestures:
+
+def get_annotation_from(frame, mode, timestamp_ms: int, do_gesture: bool = True):
+    # Ensure RGB input for MediaPipe and convert back to BGR for OpenCV display
+    if frame is None:
+        return None, frame, None
+    # If frame looks like BGR (typical from OpenCV), convert to RGB
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+    detection_result = detector.detect_for_video(image, timestamp_ms)
+    gestureResults = None
+    if do_gesture:
+        gestureResults = gestureDetector.recognize_for_video(image, timestamp_ms)
+    annotated_rgb = draw_landmarks_on_image(rgb_frame, detection_result, mode)
+    annotated_bgr = cv2.cvtColor(annotated_rgb, cv2.COLOR_RGB2BGR)
+    if gestureResults and gestureResults.gestures:
         currentGesture = gestureResults.gestures[0][0].category_name
-        return detection_result, annotated_image, currentGesture
+        return detection_result, annotated_bgr, currentGesture
     else:
-        return detection_result, annotated_image, None
+        return detection_result, annotated_bgr, None
 

@@ -6,9 +6,7 @@ def clickMouse(mouse):
 
 def doubleClickMouse(mouse):
     mouse.click(button='left')
-    mouse.release(button='left')
     mouse.click(button='left')
-    mouse.release(button='left')
     return True
 
 def releaseMouse(mouse):
